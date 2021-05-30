@@ -1,21 +1,20 @@
 // variabili globali
+var data;       // dati in ingresso dal file json
 var w = 800;    // width dello spider chart
 var h = 800;    // height dello spider chart
 var cx = w/2;   // centro sull'asse X del chart
 var cy = h/2;   // centro sull'asse Y del chart
-var rScale = d3.scaleLinear().range([0,250]);   // inizializzo la scala
+var radius = 5;      // raggio dei points
+var rScale = d3.scaleLinear().range([0,250]);           // inizializzo la scala
+var inverseRScalse = d3.scaleLinear().domain([0,250]);  // scala inversa per ottenere i punti originali
 var oScale = d3.scaleOrdinal(d3.schemeCategory10);  // colori per i dati
-//var oScale = ["#e69a61", "#9817ff", "#18c61a", "#33b4ff", "#c9167e", "#297853", "#d7011b", "#7456c7", "#7e6276", "#afb113", "#fd879c", "#fb78fa", "#24c373", "#45bbc5", "#766b21", "#abad93", "#c19ce3", "#fd8f11", "#2f56ff", "#307a11", "#b3483c", "#0d7396", "#94b665", "#9d4d91", "#b807c8", "#086cbf", "#a2abc5", "#a35702", "#d3084b", "#8c6148", "#fa82ce", "#71be42", "#2bc0a0", "#b64064", "#d09fa2"];  // colori per i dati
-var line = d3.line().x(d => d.x).y(d => d.y);   // coordinate del vertice per ogni elemento del dataset
 var maxValue;   // valore massimo contenuto nel dataset
 var minValue;   // valore minimo contenuto nel dataset
 var lenAxis     // lunghezza massima degli assi
+var updateTime = 500
 
-// creiamo lo spazio che conterrà il SVG
-var svg = d3.select("body")
-            .append("svg")
-            .attr("width", w)
-            .attr("height", h);
+
+/* ### FUNZIONI DI AUSILIO ### */
 
 // restituisce il valore massimo tra tutti i valori nel file json
 function getMaxValue(data){
@@ -43,104 +42,6 @@ function getMinValue(data){
     return min;
 }
 
-// creazione delle griglie
-function plotGrid() {
-    let equalParts = (maxValue/5).toPrecision(2);
-    lenAxis = equalParts*6
-    let ticks = [equalParts, equalParts*2, equalParts*3, equalParts*4, equalParts*5, lenAxis];
-    
-    ticks.forEach(function(t) {
-        svg.append("circle")
-           .attr("cx", cx)
-           .attr("cy", cy)
-           .attr("fill", "none")
-           .attr("stroke", "gray")
-           .attr("r", rScale(t));
-    });
-
-    ticks.forEach(t =>
-        svg.append("text")
-        .attr("x", cx+5)
-        .attr("y", cy-rScale(t)-1)
-        .text(t.toString())
-    );
-}
-
-// Generazione degli assi
-function angleToCoordinate(angle, value){
-    let x = Math.cos(angle) * rScale(value);
-    let y = Math.sin(angle) * rScale(value);
-    return {"x": cx + x, "y": cy - y};
-}
-function showAxis(data) {
-    labels = Object.keys(data[0])
-    for (var i = 0; i < labels.length; i++) {
-        let ft_name = labels[i];
-        let angle = (Math.PI / 2) + (2 * Math.PI * i / labels.length);
-        let line_coordinate = angleToCoordinate(angle, lenAxis);
-        let label_coordinate = angleToCoordinate(angle, lenAxis+5);
-
-        //draw axis line
-        svg.append("line")
-           .attr("x1", cx)
-           .attr("y1", cy)
-           .attr("x2", line_coordinate.x)
-           .attr("y2", line_coordinate.y)
-           .attr("stroke","black");
-
-        //draw axis label
-        svg.append("text")
-           .attr("x", label_coordinate.x)
-           .attr("y", label_coordinate.y)
-           .text(ft_name);
-    }
-}
-
-// funzione che calcola le coordinate per ogni elemento del file json
-function getPathCoordinates(data){
-    labels = Object.keys(data);
-    let coordinates = [];
-    for (var i = 0; i < labels.length; i++){
-        let ft_name = labels[i];
-        let angle = (Math.PI / 2) + (2 * Math.PI * i / labels.length);
-        coordinates.push(angleToCoordinate(angle, data[ft_name]));
-        
-    }
-    return coordinates;
-}
-
-// funzione che genera un colore random
-// function getRandomColor() {
-//     var letters = '0123456789ABCDEF';
-//     var color = '#';
-//     for (var i = 0; i < 6; i++) {
-//          color += letters[Math.floor(Math.random() * 16)];
-//     }
-//     return color;
-// }
-
-// funzione che mostra il grafico
-function showData(data) {
-    for (var i = 0; i < data.length; i ++){
-        let d = data[i];
-        let color = oScale(JSON.stringify(d));
-        let coordinates = getPathCoordinates(d);
-        
-        //draw the path element
-        svg.append("path")
-           .datum(coordinates)
-           .attr("d",line)
-           .attr("stroke-width", 3)
-           .attr("stroke", color)
-           .attr("fill", color)
-           .attr("stroke-opacity", 1)
-           .attr("opacity", 0.3)
-           .attr("points");
-
-           
-    }
-}
-
 // funzione che crea una relazione tra i dati e una scala di colori
 function mapColors(data) {
     let strValue = [];
@@ -150,20 +51,226 @@ function mapColors(data) {
     oScale.domain(strValue);
 }
 
-// caricamento del file json e creazione del grafico
-d3.json("data/data.json").then(function(data) {
-    console.log(data); // log dei dati
+/* ### CALCOLO COORDINATE ### */
+// funzione che calcola le coordinate per ogni elemento del file json
+function getPathCoordinates(data){
+    labels = Object.keys(data);
+    let coordinates = [];
+    for (var i = 0; i < labels.length; i++){
+        let ft_name = labels[i];
+        let angle = (Math.PI / 2) + (2 * Math.PI * i / labels.length);
+        let pos = angleToCoordinate(angle, data[ft_name]);
+        coordinates.push(pos);
+    }
+    return coordinates;
+}
 
-    mapColors(data);                // funzione che crea una relazione tra i dati e una scala di colori
 
-    maxValue = getMaxValue(data);   // trovo il valore massimo nel file json
-    minValue = getMinValue(data);   // trovo il valore minimo nel file json
+// calcolo del punto sugli assi
+function getPointAxis(x, y) {
+    return Math.sqrt(Math.pow(x,2)+Math.pow(y,2))
+}
 
+/* ### ANIMAZIONI ### */
+
+// Evento focus del mouse sul punto
+function handleMouseOver(d, i) {
+    let idPoint = "#"+d3.select(this).attr('id');   // id gruppo di punti
+    let pointCX = d3.select(this).attr("cx");       // posizione su asse X punto in focus
+    let pointCY = d3.select(this).attr("cy");       // posizione su asse Y punto in focus
+
+    // Selezione del gruppo di punti appartenenti allo stesso poligono
+    d3.selectAll(idPoint)
+        .attr("r", radius * 2);
+
+    // Aggiunta della label dei punti degli assi
+    svg.append("text")
+        .attr("id", "label")
+        .attr("x", function() { return pointCX - 30; })
+        .attr("y", function() { return pointCY - 15; })
+        .text(function() {return inverseRScalse(getPointAxis((cx - pointCX), (cy - pointCY))).toPrecision(4); });
+  }
+
+// Evento quando mouse va via dal punto
+function handleMouseOut(d, i) {
+    let idGroupPoint = "#"+d3.select(this).attr('id');
+    let idPoint = "#label";
+
+    // Selezione del gruppo di punti appartenenti allo stesso poligono
+    d3.selectAll(idGroupPoint)
+        .attr("r", radius);
+
+    // Rimozione della label
+    d3.select(idPoint).remove();
+  }
+
+/* ### GRAFICO ### */
+
+// import dei dati dal file json
+d3.json("data/data.json").then(function(d) {
+    console.log(d);                 // log dei dati
+    data = d;                       // imposto la variabile globare data uguale al file json appena letto
+    mapColors(d);                   // funzione che crea una relazione tra i dati e una scala di colori
+    maxValue = getMaxValue(d);      // trovo il valore massimo nel file json
+    minValue = getMinValue(d);      // trovo il valore minimo nel file json
     rScale.domain([0,maxValue]);    // Aggiorno il dominio della scale
+    inverseRScalse.range([0,maxValue]); // aggiurno il range della scala inversa di rScale
+    showData(d);                    // mostra il grafico
+}).catch(function(error){
+    console.log(error)              // log in caso di errore
+});
 
-    plotGrid();                     // crea le griglie
-    showAxis(data);                 // crea gli assi
+// Creazione del canvas SVG
+var svg = d3.select("body")
+    .append("svg")
+    .attr("height", h)
+    .attr("width", w);
+
+// Creazione delle griglie del grafico
+function plotGrid() {
+    let equalParts = (maxValue/5).toPrecision(2);
+    lenAxis = equalParts*6
+    let ticks = [equalParts, equalParts*2, equalParts*3, equalParts*4, equalParts*5, lenAxis];
     
-    showData(data)
+    // griglie
+    let circle = svg.selectAll("circle")
+        .data(ticks);
 
-}).catch(function(error){});
+    circle.exit().remove(); // exit
+
+    circle.enter()  // enter
+        .append("circle")
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("fill", "none")
+        .attr("stroke", "gray")
+        .transition().duration(1000)
+        .attr("r", t=>rScale(t));
+
+    // scritte
+    let txt = svg.selectAll(".tick")
+        .data(ticks);
+    
+    txt.exit().remove();    //exit
+
+    txt.enter() //enter
+        .append("text")
+        .attr("class", "tick")
+        .attr("x", cx+5)
+        .attr("y", t=>cy-rScale(t)-1)
+        .transition().duration(1000).delay(1000)
+        .attr("opacity", 1)
+        .text(t=>t.toString());
+}
+
+
+// Generazione degli assi
+function angleToCoordinate(angle, value){
+    let x = Math.cos(angle) * rScale(value);
+    let y = Math.sin(angle) * rScale(value);
+    return {"x": cx + x, "y": cy - y};
+}
+function showAxis(data) {
+    plotGrid()  // plot delle griglie
+
+    let line_coordinate = []
+    let label_coordinate = []
+
+    labels = Object.keys(data[0])
+    for (var i = 0; i < labels.length; i++) {
+        let ft_name = labels[i];
+        let angle = (Math.PI / 2) + (2 * Math.PI * i / labels.length);
+        line_coordinate.push(angleToCoordinate(angle, lenAxis));
+        label_coordinate.push(angleToCoordinate(angle, lenAxis+10));
+
+        //disegna le linee degli assi
+        let axis = svg.selectAll("line")
+            .data(line_coordinate);
+
+        axis.exit().remove();   // exit
+
+        axis.enter()    // enter
+            .append("line")
+            .attr("x1", cx)
+            .attr("y1", cy)
+            .attr("x2", l=>l.x)
+            .attr("y2", l=>l.y)
+            .transition().duration(1000).delay(1000)
+            .attr("opacity", 1)
+            .attr("stroke","black");
+
+        //disegna le label degli assi
+        let axis_label = svg.selectAll(".label")
+            .data(label_coordinate);
+
+        axis_label.exit().remove();
+
+        axis_label.enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("x", l=>l.x)
+            .attr("y", l=>l.y)
+            .transition().duration(1000).delay(1000)
+            .attr("opacity", 1)
+            .text(ft_name);
+    }
+}
+
+// funzione che mostra il grafico
+var line = d3.line().x(d => d.x).y(d => d.y);   // coordinate del vertice per ogni elemento del dataset
+function showData(data) {
+    showAxis(data);                 // crea gli assi e le griglie
+
+    allCoordinates = []
+    for (var i = 0; i < data.length; i ++){
+        let d = data[i];
+        let color = oScale(JSON.stringify(d));
+        let coordinates = getPathCoordinates(d);
+        allCoordinates.push(coordinates)
+        
+
+        // Enter clause: add new elements
+        svg.append("path")
+           .datum(coordinates)
+           .attr("class", "polygon")
+           .attr("d", d3.line().x(d => d.x).y(d => d.y))
+           .attr("stroke-width", 3)
+           .attr("stroke", color)
+           .attr("fill", color)
+           .attr("stroke-opacity", 1)
+           .transition().duration(2500)
+           .attr("opacity", 0.3);
+    }
+
+    i = 0;
+    allCoordinates.forEach(function(d) {
+        let color = oScale(JSON.stringify(d));
+        // cerchi   ##### NON FUNZIONAAAA CANCELLAREEEEE
+        let circle = svg.append("g")
+        .selectAll(".points")
+            .data(d);
+
+        circle.exit().remove(); // exit
+
+        circle.enter()  // enter
+            .append("circle")
+            .attr("class", "points")
+            .attr("id", "point"+i++)
+            .attr("cx", function(f){return f.x;})
+            .attr("cy", function(f){return f.y;})
+            .attr("fill", color)
+            .attr("stroke", "gray")
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .transition().delay(2500)
+            .attr("r", radius);
+            
+        
+    })
+
+        
+    
+}
+
+// Idea: prendo le coordinate del punto in cui clicco (vedi ANIMAZIONI per vedere come prendere bene le coordinate),
+// lo trasformo in angolo e poi ne ricavo il quadrante. Dal numero che ottengo scambio i dati e aggiorno il disegno.
