@@ -1,9 +1,10 @@
 import json 
 import random
 from random import uniform
-data = []
+data = {}
+labels = ['Cactus', 'Gelsomino', 'Margherita', 'Pianta del caffè', 'Menta', 'Pesco', 'Limone', 'Podocarpus', 'Ornitogallo', 'Asterisco marittimo']
 for i in range(10):
-    data.append({'acqua': uniform(0, 100),'sole': uniform(0, 100), 'fertilizzazione': uniform(0, 100), 'umidità': uniform(0, 100), 'resistenza': uniform(0, 100)})
+    data[labels[i]] = {'acqua': uniform(0, 100),'sole': uniform(0, 100), 'fertilizzazione': uniform(0, 100), 'umidità': uniform(0, 100), 'resistenza': uniform(0, 100)}
     
 
 print(data)

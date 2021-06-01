@@ -5,3 +5,7 @@ text{
 #label {
     font: bold 15px sans-serif;
 }
+
+rect{
+    border-radius: 25px;
+}
