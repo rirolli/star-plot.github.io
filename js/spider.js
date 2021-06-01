@@ -193,14 +193,20 @@ function handleMouseOver(d, i) {
         .attr("stroke-width", 5)
         .attr("stroke", "black");
 
-    // Aggiunta della label dei punti degli assi
-    if (!(classPoint==".legend")) {
+    // Aggiunta delle label sui punti sugli assi del path
+    d3.selectAll(idPoint).each(function() {
+        let pointCX = d3.select(this).attr("cx");
+        let pointCY = d3.select(this).attr("cy");
+        if (!("."+d3.select(this).attr('class')==".legend")) {
         svg.append("text")
             .attr("id", "label")
             .attr("x", function() { return pointCX - 30; })
             .attr("y", function() { return pointCY - 15; })
-            .text(function() {return inverseRScalse(getPointAxis((cx - pointCX), (cy - pointCY))).toPrecision(4); });
-    }
+            .text(function() {return inverseRScalse(getPointAxis((cx - pointCX), (cy - pointCY))).toFixed(2); })
+            .transition()
+            .attr("opacity", 1);
+        }
+    })
 }
 
 // Evento quando mouse va via dal punto
@@ -222,7 +228,7 @@ function handleMouseOut(d, i) {
         .attr("stroke", tempPathColor);
 
     // Rimozione della label
-    d3.select(idPoint).remove();
+    d3.selectAll(idPoint).remove();
   }
 
 /* ### GRAFICO ### */
@@ -328,7 +334,6 @@ function showAxis(data) {
             .transition().duration(1000).delay(1000)
             .attr("opacity", 1)
             .text(ft_name);
-
     }
 }
 
@@ -387,7 +392,7 @@ function showData(data, dataKeys) {
             .attr("stroke", "gray")
             .on("mouseover", handleMouseOver)
             .on("mouseout", handleMouseOut)
-            .transition().delay(2000)
+            .transition().duration(1000).delay(1500)
             .attr("r", radius);
 
         // Creazione di una legenda
@@ -407,9 +412,12 @@ function showData(data, dataKeys) {
 
         g.append("text")
             .attr("class", "legend")
+            .attr("id", "point"+i)
             .attr("x", pointPositionX+12)
             .attr("y", (pointPositionY+1)*(i+1))
-            .text(dataKeys[i]);
+            .text(dataKeys[i])
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut);
 
         i++;
         
@@ -426,7 +434,7 @@ function showData(data, dataKeys) {
         .attr("stroke", "gray")
         .attr("border-radius", 25);
 
-    legend.transition(1000).delay(2000)
+    legend.transition().duration(1000).delay(1500)
         .attr("opacity", 1);
 
 }
