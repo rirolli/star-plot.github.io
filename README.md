@@ -1,5 +1,8 @@
 # Star Plot
 
+![Alt Text](https://github.com/rirolli/spider-chart/blob/master/media/RadarChart.gif)
+
+
 ## Testo
 Crea un file json con dei dati multivariati: ci sono 10 data-cases e ogni data-case ha cinque variabili quantitative i cui valori sono tutti positivi.
 
