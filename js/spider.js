@@ -98,8 +98,7 @@ function getAngle(x,y){
 function reSortData(angle, data){
     let temp;
     let dataTemp = [];
-    if (angle < angles[0]) {    // se si trova nel primo quadrante scambio le label dei primi due assi
--17
+    if (angle < angles[0]) {    // se si trova nel primo quadrante scambio le label dei primi due assi -17
         temp = sortedLabels[0];
         sortedLabels[0] = sortedLabels[1];
         sortedLabels[1] = temp;
@@ -239,12 +238,6 @@ var svg = d3.select("body")
     .attr("height", h)
     .attr("width", w)
     .attr("onclick", "clicked(evt)");
-
-var svgKeys = d3.select("body")
-    .append("svg")
-    .attr("class", "keys")
-    .attr("height", h)
-    .attr("width", w);
 
 // Creazione delle griglie del grafico
 function plotGrid() {
@@ -442,6 +435,7 @@ function showData(data, dataKeys) {
 // Idea: prendo le coordinate del punto in cui clicco (vedi ANIMAZIONI per vedere come prendere bene le coordinate),
 // lo trasformo in angolo e poi ne ricavo il quadrante. Dal numero che ottengo scambio i dati e aggiorno il disegno.
 
+// aggiorna il grafico al click del mouse
 function updateData(data) {
 
     labels = Object.keys(data[0])
