@@ -4,10 +4,11 @@ Primo progetto di Visualizzazione delle Informazioni A.A. 2020/2021.
 ## GIF di presentazione
 ![Alt Text](https://github.com/rirolli/spider-chart/blob/master/media/RadarChart.gif)
 
-## Funzionalità
-* Rappresentazione dei dati su Star Plot con animazione di apertura;
-* Scambio di coordinate adiacenti in modo fluido al click dell'utente in un qualsiasi settore del grafico;
-* Evidenziazione dell'oggetto selezionato al passaggio del mouse (per ottenere questa visualizzazione bisogna passare il mouse sopra uno dei punti segli assi del grafico o sopra una qualunque voce della legenda) per una visualizzazione più chiara e comparsa dei valori precisi per ogni punto dell'asse.
+## Indice
+1. [Testo](#testo)
+2. [Consegna](#consegna)
+3. [Funzionalità](#funzionalità)
+4. [Descrizione della repository](#desrizione-della-repository)
 
 ## Testo
 Crea un file json con dei dati multivariati: ci sono 10 data-cases e ogni data-case ha cinque variabili quantitative i cui valori sono tutti positivi.
@@ -23,6 +24,11 @@ Il progetto dovrà essere svolto individualmente utilizzando JavaScript e D3.js 
 
 Per la consegna è sufficiente che tu risponda a questa mail fornendo un link al progetto messo a disposizione su github. La valutazione di questo mini-progetto individuale peserà tre
 punti sul voto finale.
+
+## Funzionalità
+* Rappresentazione dei dati su Star Plot con animazione di apertura;
+* Scambio di coordinate adiacenti in modo fluido al click dell'utente in un qualsiasi settore del grafico;
+* Evidenziazione dell'oggetto selezionato al passaggio del mouse (per ottenere questa visualizzazione bisogna passare il mouse sopra uno dei punti sugli assi del grafico o sopra una qualunque voce della legenda) per una visualizzazione più chiara con comparsa dei valori precisi per ogni punto dell'asse.
 
 ## Desrizione della Repository
 La seguente repository è composta dai seguenti file e cartelle:
