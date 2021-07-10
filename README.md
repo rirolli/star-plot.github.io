@@ -1,5 +1,6 @@
 # Star Plot
-Primo progetto di Visualizzazione delle Informazioni A.A. 2020/2021.
+Primo progetto di Visualizzazione delle Informazioni A.A. 2020/2021.  
+Una simulazione del progetto è visibile qui: https://rirolli.github.io/starplot.github.io/
 
 ## GIF di presentazione
 ![Alt Text](https://github.com/rirolli/spider-chart/blob/master/media/RadarChart.gif)
